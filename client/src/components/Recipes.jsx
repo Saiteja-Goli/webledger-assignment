@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { Box, Button, Center, Heading, Image, Spinner, HStack, VStack, Text } from '@chakra-ui/react'
+import { Box, Button, Center, Heading, Image, Spinner, VStack, Text } from '@chakra-ui/react'
 
 import {
     Modal,
@@ -40,18 +40,19 @@ const Recipes = () => {
         fetchData();
     }, [])
 
+    //Details Button
     const handleDetailsButton = (recipe) => {
         console.log(recipe)
         setRecipeDetails(recipe);
         onOpen();
     }
-
+    //Favourites Button
     const handleAddToFavorites = (recipe) => {
-        fetch('https://easy-pink-walkingstick-tam.cyclic.cloud/fav/add', {
+        fetch('http://localhost:8000/favourite/add', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`, // Include the user's token for authentication
+                // Authorization: `Bearer ${token}`, // Include the user's token for authentication
             },
             body: JSON.stringify({ recipe }),
         })
@@ -70,6 +71,7 @@ const Recipes = () => {
             });
 
     }
+
     return (
         <div>
             <Center>
@@ -97,7 +99,7 @@ const Recipes = () => {
                 }
 
             </Center>
-            //TOAST
+            {/* Model */}
             {
                 recipeDetails && (
                     <Modal blockScrollOnMount={false} isOpen={isOpen} onClose={onClose} size={"3xl"}>

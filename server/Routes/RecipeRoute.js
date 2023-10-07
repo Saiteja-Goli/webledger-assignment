@@ -14,14 +14,13 @@ recipe_router.get("/", async (req, res) => {
   }
 });
 
-
 //Searching the Recipe by Name
 recipe_router.post("/search", async (req, res) => {
   const api_key = "fc8138ca53854bb8808b2727d5b960e6";
   try {
     const { searchValue } = req.body;
-    console.log(req.body)
-    console.log(searchValue)
+    console.log(req.body);
+    console.log(searchValue);
     let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${api_key}&query=${searchValue}`;
     let searchResponseData = await axios.get(url);
     res.status(200).send(searchResponseData.data);

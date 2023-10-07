@@ -1,12 +1,19 @@
-import { Box, Button, Center, Heading, HStack, Image, Input, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Center, Heading, Input, Spinner, Image, useToast } from '@chakra-ui/react'
 
 import React, { useState } from 'react'
 import axios from "axios"
+import { auth, provider } from './config'
+import { signInWithPopup } from 'firebase/auth'
+
 const Navbar = () => {
+    const [value, setValue] = useState('')
     const [searchValue, setSearchValue] = useState("")
     const [recipes, setRecipes] = useState([])
     const [isLoading, setIsLoading] = useState(false);
-    
+    const [favorites, setFavorites] = useState([]);
+    const toast = useToast()
+
+    //Search Functionality
     const handleSearchButton = async () => {
         try {
             setIsLoading(true);
@@ -20,9 +27,63 @@ const Navbar = () => {
             console.error("Error occurred while making the search request:", error);
         }
     }
+    //Login With Google
+    const handleLogin = () => {
+        signInWithPopup(auth, provider)
+            .then(data => {
+                setValue(data.user)
+                console.log(data.user)
+                localStorage.setItem("email1", data.user.email)
+            })
+        console.log(value)
+    }
+    //Logout
+    const handleLogout = () => {
+        localStorage.clear();
+        window.location.reload();
+    }
+    //Adding to Favourites
+    const handleFavouriteButton = (recipe) => {
+        fetch('http://localhost:8000/favourite/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Authorization: `Bearer ${token}`, // Include the user's token for authentication
+            },
+            body: JSON.stringify({ recipe }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data.message);
+                toast({
+                    title: 'Added to Fav.',
+                    status: 'success',
+                    duration: 9000,
+                    isClosable: true,
+                })
+            })
+            .catch((err) => {
+                console.log(err);
+            });
 
-
-   
+    }
+    //Getting data from Favourites
+    const handleOpenFavourites = () => {
+        fetch('http://localhost:8000/favourite/add', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the user's token for authentication
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setFavorites(data.favorites);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
 
     return (
         <>
@@ -33,11 +94,19 @@ const Navbar = () => {
                         <Button variant='ghost' style={searchButton} onClick={handleSearchButton}>Search</Button>
                     </Box>
                     <Box style={innerContainer_Right}>
-                        <Button variant="solid" style={favButton}>Favourites</Button>
-                        <Button variant='solid' style={loginButton}>Login</Button>
+                        <Button variant="solid" style={favButton} onClick={handleOpenFavourites}>Favourites</Button>
+                        {
+                            value ? <>
+                                <Button variant='solid' style={loginButton} onClick={handleLogout}>Logout</Button>
+                            </>
+                                : <Button variant='solid' style={loginButton} onClick={handleLogin}>Login</Button>
+                        }
                     </Box>
-                </Box>
 
+                    {/* //Google Name and Picture */}
+                    <Image src={value.photoURL} width={"30px"} style={{ marginLeft: "-110px", borderRadius: "20px" }} />
+                    <p style={{ marginLeft: "-130px", fontWeight: "bold" }}>{value.displayName}</p>
+                </Box>
             </Box>
             <Center>
                 {
@@ -58,8 +127,7 @@ const Navbar = () => {
                                                 width: "30ch",
                                                 paddingLeft: "40px"
                                             }}>{recipe.title}</Heading>
-                                            <Button variant='solid' style={{ marginRight: "2px" }}>Details</Button>
-                                            <Button variant='solid' style={{ marginLeft: "2px" }}>Add to Fav</Button>
+                                            <Button variant='solid' style={{ marginLeft: "2px" }} onClick={() => handleFavouriteButton(recipe)}>Add to Fav</Button>
                                         </Box>
                                     )))
                                 }
@@ -67,13 +135,13 @@ const Navbar = () => {
                         )
                 }
             </Center>
-            
+
 
         </>
     )
 }
 
-//Styles
+// Styles
 const navBox = {
     border: "1px solid SlateBlue",
     height: "100px",
