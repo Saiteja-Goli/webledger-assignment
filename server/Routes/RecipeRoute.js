@@ -8,7 +8,7 @@ const recipe_router = express.Router();
 recipe_router.get("/", async (req, res) => {
   try {
     const spoonacularApiKey = process.env.api_key;
-    const api_url = `https://api.spoonacular.com/recipes/random?apiKey=f186ddc686dc40e4917e57a471aa0835&number=10`;
+    const api_url = `https://api.spoonacular.com/recipes/random?apiKey=f186ddc686dc40e4917e57a471aa0835&number=50`;
     const response = await axios.get(api_url);
     if (response.status === 200) {
       res.status(200).json(response.data);
