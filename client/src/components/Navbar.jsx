@@ -7,16 +7,17 @@ import { signInWithPopup } from 'firebase/auth';
 
 const Navbar = () => {
   const token = localStorage.getItem('recipe-token') ? JSON.parse(localStorage.getItem('recipe-token')) : '';
-
   const [user, setUser] = useState({
     email: '',
     displayName: '',
   });
   const [searchValue, setSearchValue] = useState("")
   const [searchResults, setSearchResults] = useState([])
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
+
+  const initialIsLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
 
   useEffect(() => {
     // Load user data from local storage when the component mounts
@@ -52,6 +53,8 @@ const Navbar = () => {
                 duration: 4000,
                 isClosable: true,
               });
+              setIsLoggedIn(true); // Set isLoggedIn to true
+              localStorage.setItem('isLoggedIn', 'true');
               navigate('/');
               window.location.reload()
             })
@@ -59,13 +62,14 @@ const Navbar = () => {
               console.error('Error:', error);
             });
         })
-        .catch(err => console.log(err));
-        setIsLoggedIn(true);
-      //Logout
+        .catch(err => {
+          console.log(err);
+        });
     } else {
       localStorage.removeItem('recipe-token');
       setUser({ email: '', displayName: '' });
-      setIsLoggedIn(false);
+      setIsLoggedIn(false); // Set isLoggedIn to false
+      localStorage.removeItem('isLoggedIn');
       window.location.reload();
       toast({
         title: 'Message',
@@ -75,22 +79,8 @@ const Navbar = () => {
         isClosable: true,
       });
     }
-
   };
 
-  //Logout
-  // const handleLogout = () => {
-  //   localStorage.removeItem('recipe-token');
-  //   setUser({ email: '', displayName: '' });
-  //   window.location.reload();
-  //   toast({
-  //     title: 'Message',
-  //     description: 'Logout Successfully',
-  //     status: 'info',
-  //     duration: 9000,
-  //     isClosable: true,
-  //   });
-  // };
 
   //Search
   const handleSearchButton = async () => {
@@ -171,12 +161,6 @@ const Navbar = () => {
             </Button>
             <HStack pl="250px">
               <>
-                {/* <Button size="lg" colorScheme="green" onClick={handleLogin}>
-                  Login
-                </Button>
-                <Button colorScheme="yellow" size="lg" onClick={handleLogout}>
-                  Logout
-                </Button> */}
                 <Button size="lg" colorScheme="green" onClick={handleLogin}>
                   {isLoggedIn ? "Logout" : "Login"}
                 </Button>
