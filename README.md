@@ -8,6 +8,10 @@ Recipe-App is a feature-rich recipe app designed to elevate your culinary experi
 
 Recipe-App also offers robust user authentication to ensure that each user's favorite recipes are stored separately and securely. You can easily add recipes to your list of favorites and, if tastes change, effortlessly delete them. Whether you're a seasoned chef or just starting your culinary journey, RecipeDelight is your trusted companion for a world of delicious recipes.
 
+### Deployed Link
+
+[Live Demo](https://client-saiteja-goli.vercel.app/)
+
 ### Backend Deploy
 
 [Live Demo](https://webledger-saiteja-goli.vercel.app)
