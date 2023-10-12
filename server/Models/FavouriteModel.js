@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 
 const favouriteSchema = mongoose.Schema({
-  recipe: { type: Object },
+  title: { type: "string" },
+  image: { type: "string" },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+  },
 });
 
 const favouriteModel = mongoose.model("favourite", favouriteSchema);

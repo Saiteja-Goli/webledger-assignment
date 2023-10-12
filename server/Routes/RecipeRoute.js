@@ -1,32 +1,45 @@
-const express = require("express");
 const axios = require("axios");
+const express = require("express");
+require("dotenv").config();
+
 const recipe_router = express.Router();
 
-//Fetching the Recipes from the third-party URL
+
 recipe_router.get("/", async (req, res) => {
-  const api_key = "fc8138ca53854bb8808b2727d5b960e6";
   try {
-    let url = `https://api.spoonacular.com/recipes/random?apiKey=${api_key}&number=20`;
-    let responseData = await axios.get(url);
-    res.status(200).send(responseData.data);
+    const spoonacularApiKey = process.env.api_key;
+    const api_url = `https://api.spoonacular.com/recipes/random?apiKey=f186ddc686dc40e4917e57a471aa0835&number=10`;
+    const response = await axios.get(api_url);
+    if (response.status === 200) {
+      res.status(200).json(response.data);
+    } else {
+      res
+        .status(500)
+        .json({ error: "Error Occurring While Fetching the Data" });
+    }
   } catch (error) {
-    res.status(500).send({ error: "Error Occuring While Fetching the Data" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-//Searching the Recipe by Name
 recipe_router.post("/search", async (req, res) => {
-  const api_key = "fc8138ca53854bb8808b2727d5b960e6";
   try {
     const { searchValue } = req.body;
-    console.log(req.body);
-    console.log(searchValue);
-    let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${api_key}&query=${searchValue}`;
-    let searchResponseData = await axios.get(url);
-    res.status(200).send(searchResponseData.data);
+    const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=f186ddc686dc40e4917e57a471aa0835&query=${searchValue}`;
+    const searchResponse = await axios.get(url);
+
+    if (searchResponse.status === 200) {
+      const searchResponseData = searchResponse.data;
+      res.status(200).json(searchResponseData);
+    } else {
+      res
+        .status(500)
+        .json({ error: "Error Occurring While Searching the Data" });
+    }
   } catch (error) {
-    res.status(500).send({ error: "Error Occuring While Searching the Data" });
+    console.error("Error in '/search' endpoint:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-module.exports = recipe_router;
+module.exports = { recipe_router };

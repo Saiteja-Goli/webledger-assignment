@@ -1,191 +1,187 @@
-import { Box, Button, Center, Heading, Input, Spinner, Image, useToast } from '@chakra-ui/react'
-
-import React, { useState } from 'react'
-import axios from "axios"
-import { auth, provider } from './config'
-import { signInWithPopup } from 'firebase/auth'
+import { useNavigate } from 'react-router-dom';
+import { Box, Button, useToast, Center, HStack, Input, Image, Heading } from '@chakra-ui/react';
+import React, { useState, useEffect } from 'react';
+import { auth, provider } from './Auth/config';
+import axios from 'axios';
+import { signInWithPopup } from 'firebase/auth';
 
 const Navbar = () => {
-    const [value, setValue] = useState('')
-    const [searchValue, setSearchValue] = useState("")
-    const [recipes, setRecipes] = useState([])
-    const [isLoading, setIsLoading] = useState(false);
-    const [favorites, setFavorites] = useState([]);
-    const toast = useToast()
+  const token = localStorage.getItem('recipe-token') ? JSON.parse(localStorage.getItem('recipe-token')) : '';
 
-    //Search Functionality
-    const handleSearchButton = async () => {
-        try {
-            setIsLoading(true);
-            const searchedValue = { searchValue }
-            const data = await axios.post("http://localhost:8000/recipes/search", searchedValue)
-            const response = data.data.results
-            console.log(response)
-            setRecipes(response)
-            setIsLoading(false);
-        } catch (error) {
-            console.error("Error occurred while making the search request:", error);
+  const [user, setUser] = useState({
+    email: '',
+    displayName: '',
+  });
+  const [searchValue, setSearchValue] = useState("")
+  const [searchResults, setSearchResults] = useState([])
+  const toast = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Load user data from local storage when the component mounts
+    const userData = JSON.parse(localStorage.getItem('recipe-token'))
+    setUser(userData || { email: '', displayName: '' });
+  }, []);
+
+  //Home
+  const handleHome = () => {
+    window.location.reload()
+  };
+
+  //Login
+  const handleLogin = () => {
+    signInWithPopup(auth, provider)
+      .then(data => {
+        localStorage.setItem('recipe-token', JSON.stringify(data.user));
+        const body = {
+          email: data.user.email,
+          displayName: data.user.displayName,
+          photoURL: data.user.photoURL,
+        };
+
+        axios
+          .post('https://webledger-saiteja-goli.vercel.app/users', body)
+          .then(response => {
+            localStorage.setItem('recipe-token', JSON.stringify(response.data));
+            setUser(response.data.data);
+            toast({
+              title: 'Success',
+              description: 'Login Successful',
+              status: 'success',
+              duration: 4000,
+              isClosable: true,
+            });
+            navigate('/');
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      })
+      .catch(err => console.log(err));
+  };
+
+  //Logout
+  const handleLogout = () => {
+    localStorage.removeItem('recipe-token');
+    setUser({ email: '', displayName: '' });
+    window.location.reload();
+    toast({
+      title: 'Message',
+      description: 'Logout Successfully',
+      status: 'info',
+      duration: 9000,
+      isClosable: true,
+    });
+  };
+
+  //Search
+  const handleSearchButton = async () => {
+    try {
+      const searchedValue = { searchValue };
+      const data = await axios.post("https://webledger-saiteja-goli.vercel.app/recipes/search", searchedValue);
+      const response = data.data.results;
+      console.log(response);
+      setSearchResults(response);
+      setSearchValue('')
+    } catch (error) {
+      console.error("Error occurred while making the search request:", error);
+    }
+  };
+
+  //Add to Favourites
+  const handleAddToFavorites = (recipe) => {
+    console.log('Adding Fav From Home from Recipes');
+    fetch('https://webledger-saiteja-goli.vercel.app/favourites/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token.token}`, // Include the user's token for authentication
+      },
+      body: JSON.stringify({ title: recipe.title, image: recipe.image }),
+    })
+      .then((res) => {
+        if (res.status === 201) {
+          toast({
+            title: 'Added to Favorites.',
+            description: "Item Added To Favourites Successfully",
+            status: 'success',
+            duration: 4000,
+            isClosable: true,
+          });
+        } else if (res.status === 400) {
+          // Recipe already in favorites
+          res.json().then((data) => {
+            toast({
+              title: 'Already in Favorites.',
+              description: "This Item Is Already in Favorites",
+              status: 'warning',
+              duration: 4000,
+              isClosable: true,
+            });
+          });
+        } else if (res.status === 401) {
+          toast({
+            title: 'Not Authorised',
+            description: 'Please Login',
+            status: 'error',
+            duration: 4000,
+            isClosable: true,
+          });
         }
-    }
-    //Login With Google
-    const handleLogin = () => {
-        signInWithPopup(auth, provider)
-            .then(data => {
-                setValue(data.user)
-                console.log(data.user)
-                localStorage.setItem("email1", data.user.email)
-            })
-        console.log(value)
-    }
-    //Logout
-    const handleLogout = () => {
-        localStorage.clear();
-        window.location.reload();
-    }
-    //Adding to Favourites
-    const handleFavouriteButton = (recipe) => {
-        fetch('http://localhost:8000/favourite/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // Authorization: `Bearer ${token}`, // Include the user's token for authentication
-            },
-            body: JSON.stringify({ recipe }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                console.log(data.message);
-                toast({
-                    title: 'Added to Fav.',
-                    status: 'success',
-                    duration: 9000,
-                    isClosable: true,
-                })
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+      })
+      .catch((err) => {
+        console.log(err);
+        toast({
+          title: 'Error',
+          description: 'An error occurred while adding to favorites.',
+          status: 'error',
+          duration: 4000,
+          isClosable: true,
+        });
+      });
+  };
 
-    }
-    //Getting data from Favourites
-    const handleOpenFavourites = () => {
-        fetch('http://localhost:8000/favourite/add', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the user's token for authentication
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setFavorites(data.favorites);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }
+  return (
+    <>
+      <Box position="fixed" top="0" left="0" right="0" zIndex="sticky" pb="30px" bg="silver">
+        <Center pt='30px'>
+          <Button size="lg" colorScheme={"teal"} mr="40px" onClick={handleHome}>Home</Button>
+          <HStack w="80%">
+            <Input borderColor={"blue.400"} color='black' placeholder="Search recipe" size="lg" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+            <Button w="20%" size="lg" colorScheme="blue" onClick={handleSearchButton}>
+              Search
+            </Button>
+            <HStack pl="250px">
+              <>
+                <Button size="lg" colorScheme="green" onClick={handleLogin}>
+                  Login
+                </Button>
+                <Button colorScheme="yellow" size="lg" onClick={handleLogout}>
+                  Logout
+                </Button>
+                <Image ml="20px" src={user.photoURL} width={"30px"} />
+                <p>{user.displayName}</p>
 
-    return (
-        <>
-            <Box style={navBox}>
-                <Box style={innerContainer}>
-                    <Box style={innerContainer_Left} >
-                        <Input style={searchBar} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
-                        <Button variant='ghost' style={searchButton} onClick={handleSearchButton}>Search</Button>
-                    </Box>
-                    <Box style={innerContainer_Right}>
-                        <Button variant="solid" style={favButton} onClick={handleOpenFavourites}>Favourites</Button>
-                        {
-                            value ? <>
-                                <Button variant='solid' style={loginButton} onClick={handleLogout}>Logout</Button>
-                            </>
-                                : <Button variant='solid' style={loginButton} onClick={handleLogin}>Login</Button>
-                        }
-                    </Box>
+              </>
+            </HStack>
+          </HStack>
+        </Center>
 
-                    {/* //Google Name and Picture */}
-                    <Image src={value.photoURL} width={"30px"} style={{ marginLeft: "-110px", borderRadius: "20px" }} />
-                    <p style={{ marginLeft: "-130px", fontWeight: "bold" }}>{value.displayName}</p>
-                </Box>
+      </Box>
+      <Center>
+        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '20px', width: '90%' }}>
+          {searchResults.map((recipe, index) => (
+            <Box key={index} style={{ padding: '10px 0', borderRadius: '30px 30px 0 0', boxShadow: 'rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px' }}>
+              <Image w="100%" src={recipe.image} style={{ borderRadius: '30px 30px 0 0', padding: '-50px' }} />
+              <Heading size="sm" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '30ch', paddingLeft: '40px' }}>{recipe.title}</Heading>
+              {/* <Button variant="solid" style={{ marginRight: '2px' }} onClick={() => handleDetailsButton(recipe)}>Details</Button> */}
+              <Button variant="solid" style={{ marginLeft: '2px' }} onClick={() => handleAddToFavorites(recipe)}>Add to Fav</Button>
             </Box>
-            <Center>
-                {
-                    isLoading
-                        ? (
-                            <Spinner size="xl" color="SlateBlue" thickness="4px" emptyColor="gray.200" style={{ margin: "250px auto" }} />
-                        )
-                        : (
-                            <Box style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "20px", width: "90%", }} >
-                                {
-                                    (recipes && recipes.map((recipe, index) => (
-                                        <Box key={index} style={{ padding: "10px 0", borderRadius: "30px 30px 0 0", boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }} >
-                                            <Image w={"100%"} src={recipe.image} style={{ borderRadius: "30px 30px 0 0", padding: "-50px" }} />
-                                            <Heading size='sm' style={{
-                                                whiteSpace: "nowrap",
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                width: "30ch",
-                                                paddingLeft: "40px"
-                                            }}>{recipe.title}</Heading>
-                                            <Button variant='solid' style={{ marginLeft: "2px" }} onClick={() => handleFavouriteButton(recipe)}>Add to Fav</Button>
-                                        </Box>
-                                    )))
-                                }
-                            </Box>
-                        )
-                }
-            </Center>
+          ))}
+        </Box>
+      </Center>
+    </>
+  );
+};
 
-
-        </>
-    )
-}
-
-// Styles
-const navBox = {
-    border: "1px solid SlateBlue",
-    height: "100px",
-    width: "100%",
-    backgroundColor: 'SlateBlue'
-}
-const innerContainer = {
-    // border: "1px solid yellow",
-    margin: "25px auto",
-    height: "50px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-}
-const innerContainer_Left = {
-    width: "50%",
-    height: "50px"
-}
-const searchBar = {
-    width: "60%",
-    height: "50px",
-    backgroundColor: "white",
-    margin: "0 0 5px 100px",
-    borderRadius: "20px 0 0 20px"
-}
-const searchButton = {
-    width: "100px",
-    height: "50px",
-    backgroundColor: "white",
-    margin: "0 0 4px 0",
-    borderRadius: "0px 20px 20px 0px"
-}
-const innerContainer_Right = {
-    width: "50%"
-}
-const favButton = {
-    marginRight: "15px",
-    height: "50px",
-    backgroundColor: "rgb(0,209,113)"
-}
-const loginButton = {
-    marginLeft: "5px",
-    backgroundColor: "rgb(0,149,255)",
-    height: "50px",
-    width: "110px"
-}
-export default Navbar
+export default Navbar;
