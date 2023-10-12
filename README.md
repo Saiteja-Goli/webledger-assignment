@@ -31,15 +31,6 @@ npm install
 npm run start
 ```
 
-## Table of Contents
-
-- [Features](#features)
-- [Endpoints](#endpoints)
-- [Database](#database)
-- [Error Handling](#error-handling)
-- [Rate Limiting (Bonus)](#rate-limiting-bonus)
-- [Middleware](#middleware)
-
 ## Features
 
 - **User Authentication**: Securely log in to access personalized features and ensure data privacy.
