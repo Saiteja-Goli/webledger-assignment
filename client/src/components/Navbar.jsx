@@ -14,6 +14,7 @@ const Navbar = () => {
   });
   const [searchValue, setSearchValue] = useState("")
   const [searchResults, setSearchResults] = useState([])
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -30,50 +31,66 @@ const Navbar = () => {
 
   //Login
   const handleLogin = () => {
-    signInWithPopup(auth, provider)
-      .then(data => {
-        localStorage.setItem('recipe-token', JSON.stringify(data.user));
-        const body = {
-          email: data.user.email,
-          displayName: data.user.displayName,
-          photoURL: data.user.photoURL,
-        };
-
-        axios
-          .post('https://webledger-saiteja-goli.vercel.app/users', body)
-          .then(response => {
-            localStorage.setItem('recipe-token', JSON.stringify(response.data));
-            setUser(response.data.data);
-            toast({
-              title: 'Success',
-              description: 'Login Successful',
-              status: 'success',
-              duration: 4000,
-              isClosable: true,
+    if (!isLoggedIn) {
+      signInWithPopup(auth, provider)
+        .then(data => {
+          localStorage.setItem('recipe-token', JSON.stringify(data.user));
+          const body = {
+            email: data.user.email,
+            displayName: data.user.displayName,
+            photoURL: data.user.photoURL,
+          };
+          axios
+            .post('https://webledger-saiteja-goli.vercel.app/users', body)
+            .then(response => {
+              localStorage.setItem('recipe-token', JSON.stringify(response.data));
+              setUser(response.data.data);
+              toast({
+                title: 'Success',
+                description: 'Login Successful',
+                status: 'success',
+                duration: 4000,
+                isClosable: true,
+              });
+              navigate('/');
+              window.location.reload()
+            })
+            .catch(error => {
+              console.error('Error:', error);
             });
-            navigate('/');
-            window.location.reload()
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
-      })
-      .catch(err => console.log(err));
+        })
+        .catch(err => console.log(err));
+        setIsLoggedIn(true);
+      //Logout
+    } else {
+      localStorage.removeItem('recipe-token');
+      setUser({ email: '', displayName: '' });
+      setIsLoggedIn(false);
+      window.location.reload();
+      toast({
+        title: 'Message',
+        description: 'Logout Successfully',
+        status: 'info',
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+
   };
 
   //Logout
-  const handleLogout = () => {
-    localStorage.removeItem('recipe-token');
-    setUser({ email: '', displayName: '' });
-    window.location.reload();
-    toast({
-      title: 'Message',
-      description: 'Logout Successfully',
-      status: 'info',
-      duration: 9000,
-      isClosable: true,
-    });
-  };
+  // const handleLogout = () => {
+  //   localStorage.removeItem('recipe-token');
+  //   setUser({ email: '', displayName: '' });
+  //   window.location.reload();
+  //   toast({
+  //     title: 'Message',
+  //     description: 'Logout Successfully',
+  //     status: 'info',
+  //     duration: 9000,
+  //     isClosable: true,
+  //   });
+  // };
 
   //Search
   const handleSearchButton = async () => {
@@ -154,11 +171,14 @@ const Navbar = () => {
             </Button>
             <HStack pl="250px">
               <>
-                <Button size="lg" colorScheme="green" onClick={handleLogin}>
+                {/* <Button size="lg" colorScheme="green" onClick={handleLogin}>
                   Login
                 </Button>
                 <Button colorScheme="yellow" size="lg" onClick={handleLogout}>
                   Logout
+                </Button> */}
+                <Button size="lg" colorScheme="green" onClick={handleLogin}>
+                  {isLoggedIn ? "Logout" : "Login"}
                 </Button>
                 <Image ml="20px" src={user.photoURL} width={"30px"} />
                 <p>{user.displayName}</p>
@@ -169,7 +189,7 @@ const Navbar = () => {
 
       </Box>
       <Center>
-        <Box  style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '20px', width: '90%',marginTop:'10px' }}>
+        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '20px', width: '90%', marginTop: '10px' }}>
           {searchResults.map((recipe, index) => (
             <Box key={index} style={{ padding: '10px 0', borderRadius: '30px 30px 0 0', boxShadow: 'rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px' }}>
               <Image w="100%" src={recipe.image} style={{ borderRadius: '30px 30px 0 0' }} />
