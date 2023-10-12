@@ -52,6 +52,7 @@ const Navbar = () => {
               isClosable: true,
             });
             navigate('/');
+            window.location.reload()
           })
           .catch(error => {
             console.error('Error:', error);
@@ -161,20 +162,18 @@ const Navbar = () => {
                 </Button>
                 <Image ml="20px" src={user.photoURL} width={"30px"} />
                 <p>{user.displayName}</p>
-
               </>
             </HStack>
           </HStack>
         </Center>
 
       </Box>
-      <Center>
-        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '20px', width: '90%' }}>
+      <Center mt='30px'>
+        <Box  style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '20px', width: '90%',marginTop:'10px' }}>
           {searchResults.map((recipe, index) => (
             <Box key={index} style={{ padding: '10px 0', borderRadius: '30px 30px 0 0', boxShadow: 'rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px' }}>
-              <Image w="100%" src={recipe.image} style={{ borderRadius: '30px 30px 0 0', padding: '-50px' }} />
+              <Image w="100%" src={recipe.image} style={{ borderRadius: '30px 30px 0 0' }} />
               <Heading size="sm" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '30ch', paddingLeft: '40px' }}>{recipe.title}</Heading>
-              {/* <Button variant="solid" style={{ marginRight: '2px' }} onClick={() => handleDetailsButton(recipe)}>Details</Button> */}
               <Button variant="solid" style={{ marginLeft: '2px' }} onClick={() => handleAddToFavorites(recipe)}>Add to Fav</Button>
             </Box>
           ))}

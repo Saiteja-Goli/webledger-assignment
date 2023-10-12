@@ -28,7 +28,7 @@ const Recipes = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('https://webledger-saiteja-goli.vercel.app/recipes/');
+      const response = await fetch(' https://webledger-saiteja-goli.vercel.app/recipes/');
       if (response.status === 200) {
         const data = await response.json(); // Parse the JSON response
         setRecipes(data.recipes);
@@ -64,7 +64,7 @@ const Recipes = () => {
   // Add to Favorites
   const handleAddToFavorites = (recipe) => {
     console.log('Adding Fav From Home from Recipes');
-    fetch('https://webledger-saiteja-goli.vercel.app/favourites/add', {
+    fetch(' https://webledger-saiteja-goli.vercel.app/favourites/add', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ const Recipes = () => {
   // Open Favorites
   const handleOpenFavourites = async () => {
     try {
-      const response = await fetch('https://webledger-saiteja-goli.vercel.app/favourites/get', {
+      const response = await fetch(' https://webledger-saiteja-goli.vercel.app/favourites/get', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -157,7 +157,7 @@ const Recipes = () => {
   // Delete From Favorites
   const handleDeleteFromFavourites = (recipe) => {
     // Call your server endpoint to delete the recipe
-    fetch('https://webledger-saiteja-goli.vercel.app/favourites/delete', {
+    fetch(' https://webledger-saiteja-goli.vercel.app/favourites/delete', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -235,7 +235,7 @@ const Recipes = () => {
 
   return (
     <div>
-      <Button size="lg" colorScheme={"orange"} mt="130px" ml="970px" mb="20px" onClick={handleOpenFavourites}>Favourites</Button>
+      <Button size="lg" colorScheme={"orange"} mt="100px" ml="970px" mb="20px" onClick={handleOpenFavourites}>Favourites</Button>
       <Center>
         {isLoading ? (
           <Spinner size="xl" color="SlateBlue" thickness="4px" emptyColor="gray.200" style={{ margin: '250px auto' }} />
