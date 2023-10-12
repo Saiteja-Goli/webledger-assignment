@@ -30,7 +30,7 @@ const Navbar = () => {
     window.location.reload()
   };
 
-  //Login
+  //Login / Logout
   const handleLogin = () => {
     if (!isLoggedIn) {
       signInWithPopup(auth, provider)
@@ -164,8 +164,8 @@ const Navbar = () => {
                 <Button size="lg" colorScheme="green" onClick={handleLogin}>
                   {isLoggedIn ? "Logout" : "Login"}
                 </Button>
-                <Image ml="20px" src={user.photoURL} width={"30px"} />
-                <p>{user.displayName}</p>
+                <Image ml="20px" src={token.photoURL} width={"30px"} />
+                <p>{token.displayName}</p>
               </>
             </HStack>
           </HStack>
