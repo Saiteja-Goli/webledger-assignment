@@ -29,7 +29,6 @@ favouriteRecipe_router.post("/add", authentication, async (req, res) => {
     await favourite.save();
     res.status(201).json({ message: "Recipe added to favorites successfully" });
   } catch (error) {
-    console.error("Error adding recipe to favorites:", error);
     res.status(500).json({ error: "Error Occurred While Favoriting the Data" });
   }
 });

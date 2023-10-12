@@ -26,7 +26,6 @@ const Recipes = () => {
 
   // Fetching Recipes
   const fetchData = async () => {
-    console.log('Entering to recipes');
     try {
       setIsLoading(true);
       const response = await fetch('https://webledger-saiteja-goli.vercel.app/recipes/');
@@ -35,7 +34,6 @@ const Recipes = () => {
         setRecipes(data.recipes);
         setIsLoading(false);
       } else {
-        // Handle the error appropriately (e.g., display a toast)
         toast({
           title: 'Error',
           description: 'Something Went Wrong',
