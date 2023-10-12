@@ -168,7 +168,7 @@ const Navbar = () => {
         </Center>
 
       </Box>
-      <Center mt='30px'>
+      <Center>
         <Box  style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '20px', width: '90%',marginTop:'10px' }}>
           {searchResults.map((recipe, index) => (
             <Box key={index} style={{ padding: '10px 0', borderRadius: '30px 30px 0 0', boxShadow: 'rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px' }}>
