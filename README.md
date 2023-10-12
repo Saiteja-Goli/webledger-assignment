@@ -29,7 +29,7 @@ SECRET=your_jwt_secret_key
 ## Installation
 
 ```npm
-git clone https://github.com/Saiteja-Goli/webledger-assignment
+git clone https://github.com/Saiteja-Goli/webledger-assignment.git
 cd server
 npm install
 npm run start
