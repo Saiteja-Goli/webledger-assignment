@@ -10,7 +10,7 @@ Recipe-App also offers robust user authentication to ensure that each user's fav
 
 ### Deployed Link
 
-[Live Demo](https://client-saiteja-goli.vercel.app/)
+[Live Demo](https://webledger-assignment-ten.vercel.app/)
 
 ### Backend Deploy
 
